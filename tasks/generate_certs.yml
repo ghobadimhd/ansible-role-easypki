@@ -40,3 +40,16 @@
     ownca_not_after: "{{ ( omit if certificate_default.provider == 'selfsigned' ) or ( certificate.not_after | default(certificate_default.not_after) | default(omit) ) }}"
     selfsigned_not_before: "{{ ( omit if certificate_default.provider == 'ownca' ) or ( certificate.not_before | default(certificate_default.not_before) | default(omit) ) }}"
     selfsigned_not_after: "{{ ( omit if certificate_default.provider == 'ownca' ) or ( certificate.not_after | default(certificate_default.not_after) | default(omit) ) }}"
+
+
+- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Generate PKCS#12 file"
+  community.crypto.openssl_pkcs12:
+    action: export
+    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.p12"
+    friendly_name: "{{ certificate.name }}"
+    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.key"
+    privatekey_passphrase: "{{ certificate.privatekey_passphrase | default(omit) }}"
+    certificate_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.crt"
+    other_certificates: "{{ ca_path | default(omit)}}"
+    select_crypto_backend: pyopenssl #FIXES: https://github.com/ansible-collections/community.crypto/issues/305
+    state: present
