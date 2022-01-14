@@ -1,0 +1,26 @@
+galaxy_info:
+  author: Mohammad Ghobadi
+  description: Create SSL certificate PKIs like easyrsa and other tools.
+  license: MIT
+  role_name: easypki
+  namespace: ghobadimhd
+  company: none
+  min_ansible_version: 2.11
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - 20.04
+
+
+  galaxy_tags:
+    - pki
+    - ssl
+    - ca
+    - certificate
+    - tls
+
+
+dependencies: []
+  # List your role dependencies here, one per line. Be sure to remove the '[]' above,
+  # if you add dependencies to this list.

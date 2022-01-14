@@ -1,0 +1,48 @@
+---
+# defaults file for easypki
+
+easypki_root_dir: ./pki
+easypki_defaults:
+  ca:
+    directory_name: .
+    basic_constraints: CA:TRUE
+    privatekey_size: 4096
+    privatekey_cipher: aes256
+    provider: selfsigned
+    key_usage: 
+      - keyCertSign
+      - cRLSign
+    extended_key_usage: []
+
+  servers:
+    directory_name: servers
+    provider: ownca
+    privatekey_size: 2048
+    privatekey_cipher: aes256
+    key_usage: 
+      - keyEncipherment
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage: 
+      - serverAuth
+    basic_constraints: CA:FALSE
+
+  clients:
+    directory_name: clients
+    provider: ownca
+    privatekey_size: 1024
+    privatekey_cipher: aes256
+    key_usage: 
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage: 
+      - clientAuth
+    basic_constraints: CA:FALSE
+
+
+
+
+
+
+easypki_chains: []
+

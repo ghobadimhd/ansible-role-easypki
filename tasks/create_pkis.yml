@@ -1,0 +1,50 @@
+---
+
+- name: Set root dir
+  set_fact:
+    root_dir: "{{ pki.root_dir | default(easypki_root_dir) }}/{{ pki.name }}"
+
+- name: Create pki root directory
+  ansible.builtin.file: 
+    state: directory
+    path: "{{ root_dir }}"
+
+- name: Generate CA certificate
+  include_tasks: generate_certs.yml
+  vars:
+    certificate_default: "{{ easypki_defaults.ca }}"
+    cert_type: CA
+  loop: "{{ [ pki.ca ] }}"
+  loop_control:
+    label: "{{ certificate.name }}"
+    loop_var: certificate
+
+- name: debug
+  debug: 
+    msg: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.key"
+
+- name: Generate Server certificates
+  include_tasks: generate_certs.yml
+  vars:
+    cert_type: Server
+    certificate_default: "{{ easypki_defaults.servers }}"
+    ca_path: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.crt"
+    ca_key_path: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.key"
+    ca_privatekey_passphrase: "{{ pki.ca.privatekey_passphrase | default(omit) }}"
+  loop: "{{ pki.servers | default([]) }}"
+  loop_control:
+    label: "{{ certificate.name }}"
+    loop_var: certificate
+
+- name: Generate clients certificates
+  include_tasks: generate_certs.yml
+  vars:
+    cert_type: Client
+    certificate_default: "{{ easypki_defaults.clients }}"
+    ca_path: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.crt"
+    ca_key_path: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.key"
+    ca_privatekey_passphrase: "{{ pki.ca.privatekey_passphrase | default(omit) }}"
+  loop: "{{ pki.clients | default([]) }}"
+  loop_control:
+    label: "{{ certificate.name }}"
+    loop_var: certificate

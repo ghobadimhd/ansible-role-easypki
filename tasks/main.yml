@@ -1,0 +1,9 @@
+---
+# tasks file for easypki
+
+- name: Create PKIs
+  include_tasks: create_pkis.yml
+  loop: "{{ easypki_chains }}"
+  loop_control:
+    label: "{{ pki.name }}"
+    loop_var: pki
