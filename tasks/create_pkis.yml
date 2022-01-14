@@ -19,10 +19,6 @@
     label: "{{ certificate.name }}"
     loop_var: certificate
 
-- name: debug
-  debug: 
-    msg: "{{ root_dir }}/{{ easypki_defaults['ca'].directory_name }}/{{ pki.ca.name }}.key"
-
 - name: Generate Server certificates
   include_tasks: generate_certs.yml
   vars:
