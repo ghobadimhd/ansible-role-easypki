@@ -10,6 +10,7 @@
           servers:
             - name: openvpn
               cn: OpenVPN
+              not_after: "+365d"
               alt_names:
                 domains: 
                   - ovpn.example.com
@@ -21,6 +22,7 @@
               o: admin
               cn: admin
             - name: client2
+              not_before: "+3d"
             - name: client3
 
         - name: Company-root-ca
