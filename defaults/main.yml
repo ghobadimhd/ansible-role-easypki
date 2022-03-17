@@ -1,14 +1,15 @@
 ---
 # defaults file for easypki
 
-easypki_root_dir: ./pki
+easypki_root_dir: ./pkis
 easypki_defaults:
   ca:
     directory_name: .
-    basic_constraints: CA:TRUE
+    filename: ca
+    provider: selfsigned
     privatekey_size: 4096
     privatekey_cipher: aes256
-    provider: selfsigned
+    basic_constraints: CA:TRUE
     key_usage: 
       - keyCertSign
       - cRLSign

@@ -1,37 +1,34 @@
-# - name: set root dir
-#   set_fact:
-#     root_dir: "{{ pki.root_dir | default(pki_root_dir) }}/{{ pki.name }}/{{ certificate_default.directory_name }}"
 
-- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Create Certificates directory"
+- name: "{{ pki_name }} > {{ cert_type }} > {{ certificate_name }} | Create Certificates directory"
   ansible.builtin.file: 
     state: directory
     path: "{{ root_dir }}/{{ certificate_default.directory_name }}"
 
-- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Generate certificate private key"
+- name: "{{ pki_name }} > {{ cert_type }} > {{ certificate_name }} | Generate certificate private key"
   community.crypto.openssl_privatekey:
-    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.key"
+    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.key"
     passphrase: "{{ certificate.privatekey_passphrase | default(omit) }}"
     cipher: "{{ ( omit if certificate.privatekey_passphrase is not defined ) or (certificate.privatekey_cipher | default(certificate_default.privatekey_cipher) )  }}"
     size: "{{ certificate.privatekey_size | default(certificate_default.privatekey_size) }}"
 
-- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Generate certificate CSR"
+- name: "{{ pki_name }} > {{ cert_type }} > {{ certificate_name }} | Generate certificate CSR"
   community.crypto.openssl_csr:
-    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.csr"
-    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.key"
+    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.csr"
+    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.key"
     subject_alt_name: "{{ ( (certificate.alt_names | default({})).domains | default([]) | map('regex_replace', '^', 'DNS:') | list ) + ( (certificate.alt_names | default({})).ips | default([]) | map('regex_replace', '^', 'IP:') | list) }}"
-    common_name: "{{ certificate.cn | default(certificate.name) }}"
+    common_name: "{{ certificate.cn | default(certificate_name) }}"
     organization_name: "{{ certificate.o | default(omit) }}"
     privatekey_passphrase: "{{ certificate.privatekey_passphrase | default(omit) }}"
     key_usage: "{{ certificate.key_usage | default(certificate_default.key_usage)}}"
     extended_key_usage: "{{ certificate.extended_key_usage | default(certificate_default.extended_key_usage)}}"
     basic_constraints: "{{ certificate.basic_constraints | default(certificate_default.basic_constraints) | default(omit) }}"
 
-- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Generate certificate"
+- name: "{{ pki_name }} > {{ cert_type }} > {{ certificate_name }} | Generate certificate"
   community.crypto.x509_certificate:
-    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.crt"
-    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.key"
+    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.crt"
+    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.key"
     privatekey_passphrase: "{{ certificate.privatekey_passphrase | default(omit)}}"
-    csr_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.csr"
+    csr_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.csr"
     provider: "{{ certificate_default.provider }}"
     ownca_path: "{{ ca_path | default(omit)}}"
     ownca_privatekey_path: "{{ ca_key_path | default(omit) }}"
@@ -42,14 +39,15 @@
     selfsigned_not_after: "{{ ( omit if certificate_default.provider == 'ownca' ) or ( certificate.not_after | default(certificate_default.not_after) | default(omit) ) }}"
 
 
-- name: "{{ pki.name }} > {{ cert_type }} > {{ certificate.name }} | Generate PKCS#12 file"
+- name: "{{ pki_name }} > {{ cert_type }} > {{ certificate_name }} | Generate PKCS#12 file"
   community.crypto.openssl_pkcs12:
     action: export
-    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.p12"
-    friendly_name: "{{ certificate.name }}"
-    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.key"
+    path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.p12"
+    friendly_name: "{{ certificate_name }}"
+    privatekey_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.key"
     privatekey_passphrase: "{{ certificate.privatekey_passphrase | default(omit) }}"
-    certificate_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.name }}.crt"
+    passphrase: "{{ certificate.pkcs12_passphrase | default(omit) }}"
+    certificate_path: "{{ root_dir }}/{{ certificate_default.directory_name }}/{{ certificate.filename | default(certificate_name) }}.crt"
     other_certificates: "{{ ca_path | default(omit)}}"
     select_crypto_backend: pyopenssl #FIXES: https://github.com/ansible-collections/community.crypto/issues/305
     state: present

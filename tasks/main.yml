@@ -3,7 +3,10 @@
 
 - name: Create PKIs
   include_tasks: create_pkis.yml
-  loop: "{{ easypki_chains }}"
+  vars: 
+    pki: "{{ pki_item.value }}"
+    pki_name: "{{ pki_item.key }}"
+  loop: "{{ easypki_chains | dict2items }}"
   loop_control:
-    label: "{{ pki.name }}"
-    loop_var: pki
+    label: "{{ pki_item.key }}"
+    loop_var: pki_item
