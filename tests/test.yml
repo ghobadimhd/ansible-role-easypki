@@ -1,7 +1,8 @@
 ---
 - hosts: localhost
+  gather_facts: no
   roles:
-    - role: easypki
+    - role: ghobadimhd.easypki
       easypki_chains: 
         OpenVPN:
           root_dir: "{{ playbook_dir }}/pkis/OpenVPN"
@@ -13,7 +14,7 @@
                 domains: 
                   - ovpn.example.com
                 ips:
-                  - "{{ ansible_host }}"
+                  - "127.0.0.1"
 
           clients:
             client1:
@@ -41,9 +42,9 @@
                 domains: 
                   - example.com
                 ips:
-                  - "{{ ansible_host }}"
+                  - "10.10.10.10"
         all-vars:
-          root_dir: "{{ playbook_dir }}/allvars-ca"
+          root_dir: "{{ playbook_dir }}/pkis/allvars-ca"
           ca: 
             directory_name: .
             filename: ca
